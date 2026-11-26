@@ -1,0 +1,77 @@
+/* Old CRT monitor filter. Active only while <html> has class "crt" (see js/crt.js).
+   Tune it here. Set a value to 0 to switch that part off. */
+:root {
+  --crt-scanline-opacity: .22; /* darkness of the scanlines (0 to 1) */
+  --crt-scanline-size: 3px;    /* height of one line pair */
+  --crt-vignette: .5;          /* darkness of the screen corners (0 to 1) */
+  --crt-glow: .45;             /* strength of the green phosphor glow (0 to 1) */
+  --crt-fringe: .5px;          /* red/cyan colour fringe offset on text */
+  --crt-flicker: .06;          /* brightness change of the flicker (0 to 1) */
+}
+
+@media screen {
+  /* Two fixed layers over the page. They never take clicks, touches or selection. */
+  html.crt body::before,
+  html.crt body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh; /* on phones: full height, also behind the collapsing toolbar */
+    z-index: 9999;
+    pointer-events: none;
+  }
+  /* Scanlines */
+  html.crt body::before {
+    background: repeating-linear-gradient(to bottom,
+      rgba(0, 0, 0, 0) 0,
+      rgba(0, 0, 0, 0) calc(var(--crt-scanline-size) * .6),
+      rgba(0, 0, 0, var(--crt-scanline-opacity)) calc(var(--crt-scanline-size) * .6),
+      rgba(0, 0, 0, var(--crt-scanline-opacity)) var(--crt-scanline-size));
+  }
+  /* Vignette (dark corners) with a faint flicker */
+  html.crt body::after {
+    background: radial-gradient(ellipse at center,
+      rgba(0, 0, 0, 0) 55%,
+      rgba(0, 0, 0, var(--crt-vignette)) 100%),
+      rgba(16, 24, 20, var(--crt-flicker));
+    animation: crt-flicker 6s steps(1) infinite;
+  }
+  /* Phosphor glow and colour fringe on all text */
+  html.crt body {
+    text-shadow:
+      0 0 6px rgba(43, 188, 138, var(--crt-glow)),
+      var(--crt-fringe) 0 0 rgba(255, 60, 90, .3),
+      calc(var(--crt-fringe) * -1) 0 0 rgba(0, 200, 255, .3);
+  }
+  html.crt ::selection { text-shadow: none; }
+  html.crt #logo { opacity: .92; }
+}
+
+@keyframes crt-flicker {
+  0%, 100% { opacity: 1; }
+  4% { opacity: .6; }
+  8% { opacity: 1; }
+  47% { opacity: .75; }
+  50% { opacity: 1; }
+  81% { opacity: .5; }
+  83% { opacity: .9; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.crt body::after { animation: none; }
+}
+
+/* The "CRT: on/off" button in the footer */
+#crt-toggle {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-shadow: inherit;
+  cursor: pointer;
+}
+#crt-toggle:hover { color: var(--hover); }
