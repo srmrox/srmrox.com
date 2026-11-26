@@ -52,18 +52,39 @@ async function loadData() {
 
 // ---------- Screen ----------
 const container = document.getElementById("term");
+// Big screens: draw the screen smaller and scale it up, so text stays readable
+// (the renderer uses a fixed font size). Render resolution is raised to match, so it stays sharp.
+const scale = () => Math.min(2, Math.max(1, innerWidth / 1400));
+const realDpr = window.devicePixelRatio || 1;
+let s = scale();
+try { Object.defineProperty(window, "devicePixelRatio", { configurable: true, get: () => realDpr * s }); } catch (e) {}
+function sizeTerm() {
+  container.style.transform = ""; container.style.width = ""; container.style.height = "";
+  const h = container.getBoundingClientRect().height || innerHeight;
+  s = scale();
+  container.style.width = innerWidth / s + "px";
+  container.style.height = h / s + "px";
+  container.style.transformOrigin = "0 0";
+  container.style.transform = s > 1 ? "scale(" + s + ")" : "";
+}
+sizeTerm();
+window.addEventListener("resize", sizeTerm); // runs before the renderer's own resize handler
+
+// CRT look. Tuned for sharp, readable text: little jitter, wobble and ghosting.
 const crt = new CRTTerminal({
   container,
   fontColor: "#2bbc8a",          // same green as the plain site
-  screenCurvature: 0.3,
-  bloom: 0.55,
-  rgbShift: 0.002,
-  flickering: reduced ? 0 : 0.1,
-  horizontalSync: reduced ? 0 : 0.08,
-  jitter: reduced ? 0 : 0.12,
-  staticNoise: reduced ? 0.04 : 0.12,
-  glowingLine: reduced ? 0 : 0.2,
-  burnIn: 0.25,
+  screenCurvature: 0.25,
+  bloom: 0.35,
+  brightness: 0.55,
+  rgbShift: 0,
+  flickering: reduced ? 0 : 0.04,
+  horizontalSync: reduced ? 0 : 0.015,
+  jitter: reduced ? 0 : 0.02,
+  staticNoise: reduced ? 0.02 : 0.05,
+  glowingLine: reduced ? 0 : 0.1,
+  burnIn: 0.05,
+  rasterizationIntensity: 0.4,
 });
 
 const term = new Terminal({ cols: 80, rows: 24, scrollback: 1000, convertEol: true });
