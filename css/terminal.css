@@ -1,0 +1,39 @@
+/* WebGL CRT terminal mode (index.html only). Active while <html> has class "term". */
+#term, #term-bar { display: none; }
+
+html.term, html.term body { height: 100%; overflow: hidden; background: #000; }
+html.term body { max-width: none; padding: 0; }
+/* Plain content stays in the page for screen readers and search engines, but is not shown. */
+html.term .content {
+  position: absolute !important; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+/* The CSS CRT filter is not needed on top of the WebGL one. */
+html.term body::before, html.term body::after { display: none !important; }
+
+html.term #term { display: block; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #000; cursor: text; touch-action: manipulation; }
+html.term #term canvas { display: block; }
+
+/* Hidden xterm.js: it only handles keyboard input. 16px font stops iOS zooming on focus. */
+.xterm-hidden { position: fixed; left: 0; top: 0; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
+.xterm-hidden textarea { font-size: 16px; }
+
+/* Command buttons for touch screens */
+@media (pointer: coarse) {
+  html.term-ready #term-bar {
+    display: flex; flex-wrap: nowrap; justify-content: center; gap: 4px; overflow-x: auto;
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 2;
+    padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+    background: rgba(0, 0, 0, .7);
+  }
+  html.term #term { bottom: calc(52px + env(safe-area-inset-bottom)); }
+}
+#term-bar button {
+  font: 13px/1 var(--font); flex: none; color: #2bbc8a; background: #0b1410;
+  border: 1px solid #2bbc8a; border-radius: 4px; padding: 8px 9px; min-height: 36px;
+  text-shadow: 0 0 6px rgba(43, 188, 138, .6);
+}
+#term-bar button:active { background: #2bbc8a; color: #000; }
+
+#term-toggle { margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-shadow: inherit; cursor: pointer; }
+#term-toggle:hover { color: var(--hover); }
